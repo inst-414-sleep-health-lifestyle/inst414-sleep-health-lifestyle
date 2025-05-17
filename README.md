@@ -1,6 +1,6 @@
 # Sleep, Health, and Lifestyle Prediction
 
-**Written By: Lily Gates, Christine Lee, Sharanya Padithaya*  
+*Written By: Lily Gates, Christine Lee, Sharanya Padithaya*  
 *University of Maryland, 2025*
 
 ## Description
