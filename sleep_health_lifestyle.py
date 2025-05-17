@@ -51,41 +51,44 @@ Summary:
 # Step 0: Make a copy to preserve original
 df_copy = df.copy()
 
-# Step 1: Rename all columns to snake_case
+# Step 1: Standardize column names to snake_case
 df_copy.columns = df_copy.columns.str.strip().str.lower().str.replace(' ', '_')
+
+# Step 1.5: Fix missing or empty sleep_disorder labels (Step 2 & 3)
+# Fill NaNs with 'None' and fix empty strings if any
+df_copy['sleep_disorder'] = df_copy['sleep_disorder'].fillna('None')
+df_copy.loc[df_copy['sleep_disorder'].str.strip() == '', 'sleep_disorder'] = 'None'
+
+# Now check the distribution again to confirm
+print("Target class distribution BEFORE encoding:")
+print(df_copy['sleep_disorder'].value_counts())
 
 # Step 2: Split blood_pressure into systolic and diastolic
 df_copy[['systolic', 'diastolic']] = df_copy['blood_pressure'].str.split('/', expand=True)
 df_copy['systolic'] = pd.to_numeric(df_copy['systolic'], errors='coerce')
 df_copy['diastolic'] = pd.to_numeric(df_copy['diastolic'], errors='coerce')
 
-# Step 3: One-hot encode relevant categorical features (predictors)
+# Step 3: Drop unused columns (e.g., person_id and original blood_pressure)
+df_cleaned = df_copy.drop(columns=['person_id', 'blood_pressure'])
+
+# Step 4: One-hot encode relevant categorical predictors
 df_encoded = pd.get_dummies(
-    df_copy.drop(columns=['person_id', 'blood_pressure']), 
-    columns=['gender', 'occupation', 'bmi_category'], 
+    df_cleaned,
+    columns=['gender', 'occupation', 'bmi_category'],
     drop_first=True
 )
-# Step 4: Define features (X) and target (y) — y keeps original string labels
+
+# Step 5: Define features (X) and target (y) — y keeps original string labels
 X = df_encoded.drop(columns=['sleep_disorder'])
 y = df_encoded['sleep_disorder']  # string labels like 'None', 'Insomnia', 'Sleep Apnea'
 
-# Step 5: Manually map target labels to desired numeric order
+# Step 6: Manually map target labels to desired numeric order
 class_order = ['None', 'Insomnia', 'Sleep Apnea']
 class_mapping = {label: idx for idx, label in enumerate(class_order)}
 y_encoded = y.map(class_mapping)
 
 # Save class order for later use in plots and reports
 le_classes_ordered = np.array(class_order)
-#print(le_classes_ordered)
-
-# Evaluate class balance before training:
-"""
-The classes are mildly imbalanced — the "None" class is a little more than half the dataset.
-This imbalance isn't severe enough to panic over, but it can influence model performance
-(e.g., the model might favor predicting the majority class).
-"""
-
-#print(y_encoded.value_counts(normalize=True))
 
 # -------------------------------------------
 # M-C Logistic Regression: TRAIN & STANDARDIZE
@@ -113,16 +116,18 @@ y_pred_log_reg = log_reg_model.predict(X_test_scaled)
 # -------------------------------------------
 # M-C Logistic Regression: FEATURE ANALYSIS
 # -------------------------------------------
+
+# -------------------------------------------
+# DataFrame of Feature Analysis
+# -------------------------------------------
 # Logistic Regression Coefficient-Based Feature Analysis
+
 """
 Summary:
 To interpret the influence of each predictor on classification outcomes, we analyzed the learned logistic regression coefficients for each sleep disorder class.
 This coefficient-based feature analysis allows us to identify the most influential features per class.”
 """
 
-# -------------------------------------------
-# DataFrame of Feature Analysis
-# -------------------------------------------
 # DataFrame of coefficients: classes as rows, features as columns
 coef_df = pd.DataFrame(
     log_reg_model.coef_,           # shape: (n_classes, n_features)
@@ -135,13 +140,12 @@ coef_df.to_csv("logistic_regression_coefficients_by_class.csv")
 print(f"\nFeature Anaysis (Logistic Regression) saved as 'logistic_regression_coefficients_by_class.csv'\n")
 
 # Display the coefficients DataFrame
-print(coef_df)
+#print(coef_df)
+coef_df
 
 # -------------------------------------------
 # Plotting Feature Analysis
 # -------------------------------------------
-# Note: 3 total graphs, 1 for ea class
-
 for cls in coef_df.index:
     plt.figure(figsize=(10, 6))
     class_coef = coef_df.loc[cls].sort_values()
@@ -192,11 +196,11 @@ for cls in coef_df.index:
 # -------------------------------------------
 
 print(f"\nLogistic Regression Accuracy: {accuracy_score(y_test, y_pred_log_reg):.4f}\n")
-print("Logistic Regression Classification Report:\n\n", classification_report(y_test, y_pred_log_reg, target_names=le.classes_))
+print("Logistic Regression Classification Report:\n\n", classification_report(y_test, y_pred_log_reg, target_names=le_classes_ordered))
 
 # Generate confusion matrix
-cm = confusion_matrix(y_test, y_pred_log_reg, labels=range(len(le.classes_)))
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=le.classes_)
+cm = confusion_matrix(y_test, y_pred_log_reg, labels=range(len(le_classes_ordered)))
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=le_classes_ordered)
 disp.plot(cmap='Blues', xticks_rotation=45)
 
 # Add title and layout
@@ -216,9 +220,9 @@ plt.show()
 # Create a DataFrame of test data with predictions
 misclassified_df = X_test.copy()
 
-# Map numeric labels back to original class names
-misclassified_df['True Label'] = le.inverse_transform(y_test)
-misclassified_df['Predicted Label'] = le.inverse_transform(y_pred_log_reg)
+# Map numeric labels back to original string labels using le_classes_ordered
+misclassified_df['True Label'] = y_test.map(lambda x: le_classes_ordered[x])
+misclassified_df['Predicted Label'] = pd.Series(y_pred_log_reg, index=y_test.index).map(lambda x: le_classes_ordered[x])
 
 # Filter only the misclassified rows
 misclassified_only = misclassified_df[misclassified_df['True Label'] != misclassified_df['Predicted Label']]
@@ -232,7 +236,8 @@ print("Number of Misclassifications:", len(misclassified_only))
 misclassified_only.to_csv("logreg_misclassified_sleep_disorder_predictions.csv", index=False)
 print("\nMisclassified (log regress) data saved to 'logreg_misclassified_sleep_disorder_predictions.csv'\n")
 
-print(misclassified_only)
+#print(misclassified_only)
+misclassified_only
 
 # ===========================================
 # Decision Tree
@@ -286,7 +291,7 @@ print("\nThe cross-validation scores graph is saved as: 'cross_val_scores_vs_dep
 plt.show()
 
 # -------------------------------------------
-# Decision Tree: TRAIN & STANDARDIZE
+# Decision Tree: TRAIN
 # -------------------------------------------
 
 # Train Optimal Decision Tree
@@ -306,7 +311,7 @@ plot_tree(
     dt_model,
     filled=True,
     feature_names=X_train.columns,
-    class_names=le_classes_ordered,
+    class_names = list(le_classes_ordered),
     rounded=True,
     fontsize=11
 )
@@ -335,7 +340,7 @@ plt.show()
 # Extract the decision tree rules with feature names and max depth
 tree_rules = export_text(dt_model, feature_names=list(X_train.columns), max_depth=best_depth)
 
-print(f"\nTne decision tree rules have been saved to 'decision_tree_rules.txt' ({len(tree_rules.splitlines())} lines).\n")
+print(f"\nThe decision tree rules have been saved to 'decision_tree_rules.txt' ({len(tree_rules.splitlines())} lines).\n")
 
 # Print the rules to the console (optional)
 print(tree_rules)
@@ -447,9 +452,9 @@ plt.show()
 # Create a DataFrame of test data with predictions
 misclassified_dt_df = X_test.copy()
 
-# Map numeric labels back to original class names
-misclassified_dt_df['True Label'] = le.inverse_transform(y_test)
-misclassified_dt_df['Predicted Label'] = le.inverse_transform(y_pred_dt)
+# Map numeric labels back to original string class names using le_classes_ordered
+misclassified_dt_df['True Label'] = y_test.map(lambda x: le_classes_ordered[x])
+misclassified_dt_df['Predicted Label'] = pd.Series(y_pred_dt, index=y_test.index).map(lambda x: le_classes_ordered[x])
 
 # Filter only the misclassified rows
 misclassified_dt_only = misclassified_dt_df[misclassified_dt_df['True Label'] != misclassified_dt_df['Predicted Label']]
