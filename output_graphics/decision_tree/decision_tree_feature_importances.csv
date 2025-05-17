@@ -1,0 +1,24 @@
+Feature,Importance
+bmi_category_Overweight,0.4751584919358493
+diastolic,0.43894348956284046
+systolic,0.07448428983015136
+sleep_duration,0.011413728671158968
+occupation_Manager,0.0
+bmi_category_Obese,0.0
+bmi_category_Normal Weight,0.0
+occupation_Teacher,0.0
+occupation_Software Engineer,0.0
+occupation_Scientist,0.0
+occupation_Salesperson,0.0
+occupation_Sales Representative,0.0
+occupation_Nurse,0.0
+age,0.0
+occupation_Lawyer,0.0
+occupation_Doctor,0.0
+gender_Male,0.0
+daily_steps,0.0
+heart_rate,0.0
+stress_level,0.0
+physical_activity_level,0.0
+quality_of_sleep,0.0
+occupation_Engineer,0.0
