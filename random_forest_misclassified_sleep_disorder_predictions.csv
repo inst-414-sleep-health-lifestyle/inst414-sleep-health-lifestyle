@@ -1,0 +1,6 @@
+age,sleep_duration,quality_of_sleep,physical_activity_level,stress_level,heart_rate,daily_steps,systolic,diastolic,gender_Male,occupation_Doctor,occupation_Engineer,occupation_Lawyer,occupation_Manager,occupation_Nurse,occupation_Sales Representative,occupation_Salesperson,occupation_Scientist,occupation_Software Engineer,occupation_Teacher,bmi_category_Normal Weight,bmi_category_Obese,bmi_category_Overweight,True Label,Predicted Label
+29,6.5,5,40,7,80,4000,132,87,False,False,False,False,False,True,False,False,False,False,False,True,False,False,Insomnia,Sleep Apnea
+59,8.1,9,75,3,68,7000,140,95,False,False,False,False,False,True,False,False,False,False,False,False,False,True,None,Sleep Apnea
+43,6.5,6,45,7,72,6000,130,85,True,False,False,False,False,False,False,True,False,False,False,False,False,True,Sleep Apnea,Insomnia
+50,6.1,6,90,8,75,10000,140,95,False,False,False,False,False,True,False,False,False,False,False,False,False,True,Insomnia,Sleep Apnea
+36,6.6,5,35,7,74,4800,129,84,True,False,False,False,False,False,False,False,False,False,True,False,False,True,Insomnia,Sleep Apnea
