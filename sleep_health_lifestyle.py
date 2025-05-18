@@ -113,6 +113,8 @@ log_reg_model.fit(X_train_scaled, y_train)
 # Step 4. Make predictions
 y_pred_log_reg = log_reg_model.predict(X_test_scaled)
 
+
+
 # -------------------------------------------
 # M-C Logistic Regression: FEATURE ANALYSIS
 # -------------------------------------------
@@ -122,11 +124,10 @@ y_pred_log_reg = log_reg_model.predict(X_test_scaled)
 # -------------------------------------------
 # Logistic Regression Coefficient-Based Feature Analysis
 
-"""
-Summary:
-To interpret the influence of each predictor on classification outcomes, we analyzed the learned logistic regression coefficients for each sleep disorder class.
-This coefficient-based feature analysis allows us to identify the most influential features per class.”
-"""
+# Summary:
+#To interpret the influence of each predictor on classification outcomes, we analyzed the learned logistic regression coefficients for each sleep disorder class.
+# This coefficient-based feature analysis allows us to identify the most influential features per class.”
+
 
 # DataFrame of coefficients: classes as rows, features as columns
 coef_df = pd.DataFrame(
@@ -350,11 +351,11 @@ with open("decision_tree_rules.txt", "w") as f:
     f.write(tree_rules)
 
 # -------------------------------------------
-# Decision Tree: FEATURE ANALYSIS
+# Decision Tree: FEATURE IMPORTANCE ANALYSIS
 # -------------------------------------------
 
 # -------------------------------------------
-# DataFrame for Feature Analysis
+# DataFrame for Feature Importance Analysis
 # -------------------------------------------
 
 # Create a DataFrame for feature importances
@@ -382,7 +383,7 @@ print(f"\nFeature importances saved to '{feat_imp_filename}'\n")
 print(feat_imp_df)
 
 # -------------------------------------------
-# Plot for Feature Analysis
+# Plot for Feature Importance Analysis
 # -------------------------------------------
 
 # Filter non-zero importance features and sort ascending
@@ -444,7 +445,6 @@ print("Confusion Matrix (Decision Tree) saved as 'confusion_matrix_decision_tree
 # Show the plot
 plt.show()
 
-
 # -------------------------------------------
 # Decision Tree: MISCLASSIFICATIONS
 # -------------------------------------------
@@ -452,9 +452,9 @@ plt.show()
 # Create a DataFrame of test data with predictions
 misclassified_dt_df = X_test.copy()
 
-# Map numeric labels back to original string class names using le_classes_ordered
-misclassified_dt_df['True Label'] = y_test.map(lambda x: le_classes_ordered[x])
-misclassified_dt_df['Predicted Label'] = pd.Series(y_pred_dt, index=y_test.index).map(lambda x: le_classes_ordered[x])
+# Map numeric labels back to original class names using class_order
+misclassified_dt_df['True Label'] = [class_order[i] for i in y_test]
+misclassified_dt_df['Predicted Label'] = [class_order[i] for i in y_pred_dt]
 
 # Filter only the misclassified rows
 misclassified_dt_only = misclassified_dt_df[misclassified_dt_df['True Label'] != misclassified_dt_df['Predicted Label']]
@@ -475,27 +475,196 @@ print(misclassified_dt_only)
 # ===========================================
 # Random Forest
 # ===========================================
-# -------------------------------------------
-# Random Forest: PRE-PROCESSING
-# -------------------------------------------
-
 
 # -------------------------------------------
 # Random Forest: TRAIN & STANDARDIZE
 # -------------------------------------------
 
+# Fit the Random Forest model
+random_forest_model = RandomForestClassifier(random_state=42)
+random_forest_model.fit(X_train, y_train)
+
+# Predict on test data
+y_pred_rf = random_forest_model.predict(X_test)
+
 # -------------------------------------------
-# Random Forest: CONFUSION MATRIX
+# Random Forest: FEATURE IMPORTANCE ANALYSIS
 # -------------------------------------------
 
+# Extract feature importances from the trained model
+feature_importances = random_forest_model.feature_importances_
+
+# -------------------------------------------
+# DataFrame for Feature Importance Analysis
+# -------------------------------------------
+
+# Create a DataFrame with feature names and their importance
+feature_importance_df = pd.DataFrame({
+    'Feature': X_train.columns,
+    'Importance': feature_importances
+}).sort_values(by='Importance', ascending=False)
+
+# -------------------------------------------
+# Plot for Feature Importance Analysis
+# -------------------------------------------
+
+plt.figure(figsize=(12, 8))
+sns.barplot(
+    data=feature_importance_df.head(20),  # Show top 20 for readability
+    x='Importance',
+    y='Feature',
+    palette='viridis'
+)
+
+plt.title('Top 20 Most Important Features (Random Forest)', fontsize=16)
+plt.xlabel('Importance')
+plt.ylabel('Feature')
+plt.tight_layout()
+plt.savefig("random_forest_feature_importance.png", dpi=300, bbox_inches='tight')
+print("Random forest feature importance graph saved as: 'random_forest_feature_importance.png'")
+plt.show()
+
+# -------------------------------------------
+# Random Forest: EVALUATION
+#-------------------------------------------
+# Accuracy Score
+accuracy = accuracy_score(y_test, y_pred_rf)
+print(f"\nRandom Forest Accuracy: {accuracy:.4f}\n")
+
+# Classification Report (Precision, Recall, F1-Score)
+print("Random Forest Classification Report:\n\n", classification_report(y_test, y_pred_rf, target_names=le_classes_ordered))
+
+# Confusion Matrix
+cm = confusion_matrix(y_test, y_pred_rf, labels=range(len(le_classes_ordered)))
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=le_classes_ordered)
+disp.plot(cmap='Blues', xticks_rotation=45)
+
+# Add title and adjust layout
+plt.title("Confusion Matrix: Random Forest")
+plt.tight_layout()
+
+# Save figure with descriptive name
+plt.savefig("confusion_matrix_random_forest_sleep_disorder.png", dpi=300, bbox_inches='tight')
+print("Confusion Matrix (Random Forest) saved as 'confusion_matrix_random_forest_sleep_disorder.png'\n")
+
+# Show the plot
+plt.show()
 
 # -------------------------------------------
 # Random Forest: MISCLASSIFICATIONS
 # -------------------------------------------
+# Create a DataFrame of test data with predictions
+misclassified_dt_rf = X_test.copy()
 
+# Map numeric labels back to original class names
+misclassified_dt_rf['True Label'] = [class_order[i] for i in y_test]
+misclassified_dt_rf['Predicted Label'] = [class_order[i] for i in y_pred_rf]
 
-# -------------------------------------------
+# Filter only the misclassified rows
+misclassified_rf_only = misclassified_dt_rf[misclassified_dt_rf['True Label'] != misclassified_dt_rf['Predicted Label']]
+
+# Reset index for nicer display
+misclassified_rf_only = misclassified_rf_only.reset_index(drop=True)
+
+print("Number of Misclassifications (Random Forest):", len(misclassified_rf_only))
+
+# Save misclassified results to CSV
+filename_dt = "random_forest_misclassified_sleep_disorder_predictions.csv"
+misclassified_rf_only.to_csv(filename_dt, index=False)
+print(f"\nMisclassified (Random Forest) data saved to '{filename_dt}'\n")
+
+# Display the DataFrame
+print(misclassified_rf_only)
+
+# ===========================================
 # EVALUATION
 # Cross-Comparison Between ALL Models
-# -------------------------------------------
+# ===========================================
 
+# ----------------------------------------------------------
+# PREDICTIONS FOR EACH MODEL
+# ----------------------------------------------------------
+y_pred_log_reg = log_reg_model.predict(X_test_scaled)
+y_pred_dt = dt_model.predict(X_test)
+y_pred_rf = random_forest_model.predict(X_test)
+
+# ----------------------------------------------------------
+# METRICS: ACCURACY, PRECISION, RECALL, F1 (with average='weighted')
+# ----------------------------------------------------------
+logreg_acc = accuracy_score(y_test, y_pred_log_reg)
+logreg_prec = precision_score(y_test, y_pred_log_reg, average='weighted')
+logreg_recall = recall_score(y_test, y_pred_log_reg, average='weighted')
+logreg_f1 = f1_score(y_test, y_pred_log_reg, average='weighted')
+
+dt_acc = accuracy_score(y_test, y_pred_dt)
+dt_prec = precision_score(y_test, y_pred_dt, average='weighted')
+dt_recall = recall_score(y_test, y_pred_dt, average='weighted')
+dt_f1 = f1_score(y_test, y_pred_dt, average='weighted')
+
+rf_acc = accuracy_score(y_test, y_pred_rf)
+rf_prec = precision_score(y_test, y_pred_rf, average='weighted')
+rf_recall = recall_score(y_test, y_pred_rf, average='weighted')
+rf_f1 = f1_score(y_test, y_pred_rf, average='weighted')
+
+# ----------------------------------------------------------
+# CREATE METRICS DATAFRAME
+# ----------------------------------------------------------
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
+model_metrics = {
+    "Model": ["Logistic Regression", "Decision Tree", "Random Forest"],
+    "Accuracy": [logreg_acc, dt_acc, rf_acc],
+    "Precision": [logreg_prec, dt_prec, rf_prec],
+    "Recall": [logreg_recall, dt_recall, rf_recall],
+    "F1 Score": [logreg_f1, dt_f1, rf_f1]
+}
+
+metrics_df = pd.DataFrame(model_metrics)
+metrics_df.set_index('Model', inplace=True)
+
+print("\n-----------------------------------------\n")
+print(metrics_df)
+print("\n-----------------------------------------\n")
+
+# ----------------------------------------------------------
+# BAR PLOTS: COMPARISON OF METRICS
+# ----------------------------------------------------------
+
+# --------- Bar Plot: Models on x-axis ----------
+plasma = ['#0d0887', '#7201a8', '#bd3786', '#ed7953']
+
+ax1 = metrics_df[['Accuracy', 'Precision', 'Recall', 'F1 Score']].plot(
+    kind='bar',
+    figsize=(10, 6),
+    color=plasma
+)
+plt.title('Comparison of Evaluation Metrics by Model', fontsize=14)
+plt.ylabel('Score')
+plt.xlabel('Model')
+plt.ylim(0.7, 0.82)
+plt.xticks(rotation=0)
+plt.legend(title='Metric')
+plt.tight_layout()
+plt.savefig("metric_by_model_comparison.png", dpi=300, bbox_inches='tight')
+print("Comparison of evaluation metrics saved as: 'metric_by_model_comparison.png'")
+plt.show()
+
+# --------- Bar Plot: Metrics on x-axis ----------
+viridis = ['#35b779', '#3e4989', '#440154']
+
+ax2 = metrics_df.T.plot(
+    kind='bar',
+    figsize=(10, 6),
+    color=viridis
+)
+plt.title('Comparison of Models by Evaluation Metric', fontsize=14)
+plt.ylabel('Score')
+plt.xlabel('Metric')
+plt.ylim(0.7, 0.82)
+plt.xticks(rotation=0)
+plt.legend(title='Model')
+plt.tight_layout()
+plt.savefig("model_by_metric_comparison.png", dpi=300, bbox_inches='tight')
+print("Comparison of models saved as: 'model_by_metric_comparison.png'")
+plt.show()
