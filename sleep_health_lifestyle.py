@@ -206,7 +206,7 @@ disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=le_classes_ord
 disp.plot(cmap='Blues', xticks_rotation=45)
 
 # Add title and layout
-plt.title("Confusion Matrix: Logistic Regression")
+plt.title("Confusion Matrix: Logistic Regression", fontweight='bold')
 plt.tight_layout()
 
 # Save figure with a descriptive name
@@ -267,9 +267,13 @@ for depth in depths:
     scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
     cv_scores.append(scores.mean())
 
+# -------------------------------------------
+# Graph Cross-Validation
+# -------------------------------------------
+
 # Plot the results
 plt.plot(depths, cv_scores, marker='o', label='Cross-Validation Accuracy')
-plt.title('Cross-Validation Scores vs Tree Depth')
+plt.title('Cross-Validation Scores vs Tree Depth', fontweight='bold')
 plt.xlabel('Max Depth')
 plt.ylabel('Cross-Validation Accuracy')
 
@@ -280,8 +284,8 @@ best_score = max(cv_scores)
 # Mark the best point
 plt.scatter(best_depth, best_score, color='red', zorder=5, label=f'Best Depth: {best_depth}\nAccuracy: {best_score:.4f}')
 
-# Add legend
-plt.legend()
+# Add legend in bottom right
+plt.legend(loc='lower right')
 
 
 # Output the optimal max_depth and corresponding score
@@ -400,7 +404,7 @@ colors = [cmap(i % cmap.N) for i in range(num_colors)]  # cycle if more than 10 
 plt.figure(figsize=(10, 8))
 bars = plt.barh(feat_imp_nonzero['Feature'], feat_imp_nonzero['Importance'], color=colors)
 
-plt.title('Feature Importance from Decision Tree (Non-zero only)', fontweight='bold', fontsize=18)
+plt.title('Feature Importance from Decision Tree\n(Non-zero only)', fontweight='bold', fontsize=18)
 plt.xlabel('Importance', fontsize=14)
 plt.ylabel('Feature', fontsize=14)
 
@@ -440,7 +444,7 @@ disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=le_classes_ord
 disp.plot(cmap='Blues', xticks_rotation=45)
 
 # Add title and adjust layout
-plt.title("Confusion Matrix: Decision Tree")
+plt.title("Confusion Matrix: Decision Tree", fontweight='bold')
 plt.tight_layout()
 
 # Save figure with descriptive name
@@ -515,7 +519,8 @@ feature_importance_df = pd.DataFrame({
 # Plot for Feature Importance Analysis
 # -------------------------------------------
 
-# Generate a color list from viridis cmap for the top 20 featurescolors = plt.cm.viridis(np.linspace(0.3, 0.8, 20))
+# Generate a color list from viridis cmap for the top 20 features
+colors = plt.cm.viridis(np.linspace(0.3, 0.8, 20))
 colors = colors.tolist()  # convert numpy array to list of RGBA tuples
 
 plt.figure(figsize=(12, 8))
@@ -523,10 +528,12 @@ sns.barplot(
     data=feature_importance_df.head(20),
     x='Importance',
     y='Feature',
+    hue='Feature',
+    dodge=False,
     palette=colors,
     legend=False  # suppress legend if you want (optional)
 )
-plt.title('Top 20 Most Important Features (Random Forest)', fontsize=16)
+plt.title('Top 20 Most Important Features (Random Forest)', fontsize=16, fontweight='bold')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
 plt.tight_layout()
@@ -554,7 +561,7 @@ disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=le_classes_ord
 disp.plot(cmap='Blues', xticks_rotation=45)
 
 # Add title and adjust layout
-plt.title("Confusion Matrix: Random Forest")
+plt.title("Confusion Matrix: Random Forest", fontweight='bold')
 plt.tight_layout()
 
 # Save figure with descriptive name
