@@ -26,7 +26,7 @@ from sklearn.model_selection import train_test_split, cross_val_score, Stratifie
 # Load and preview the dataset
 # -------------------------------------------
 df = pd.read_csv('sleep_health_and_lifestyle_dataset.csv')
-df.head()
+#df.head()
 
 # ===========================================
 # Multi-Class Logistic Regression
@@ -140,8 +140,11 @@ coef_df.to_csv("logistic_regression_coefficients_by_class.csv")
 print(f"\nFeature Anaysis (Logistic Regression) saved as 'logistic_regression_coefficients_by_class.csv'\n")
 
 # Display the coefficients DataFrame
-#print(coef_df)
-coef_df
+
+print("\n-----------------------------------------\n")
+print("Logistic Regression Coefficient-Based Features\n")
+print(coef_df)
+print("\n-----------------------------------------\n")
 
 # -------------------------------------------
 # Plotting Feature Analysis
@@ -387,7 +390,11 @@ feat_imp_df.to_csv(feat_imp_filename, index=False)
 print(f"\nFeature importances saved to '{feat_imp_filename}'\n")
 
 # Display the DataFrame
+print("\n-----------------------------------------\n")
+print("Decision Tree: Feature Importance\n")
 print(feat_imp_df)
+print("\n-----------------------------------------\n")
+
 
 # -------------------------------------------
 # Plot for Feature Importance Analysis
@@ -514,6 +521,12 @@ feature_importance_df = pd.DataFrame({
     'Feature': X_train.columns,
     'Importance': feature_importances
 }).sort_values(by='Importance', ascending=False)
+
+# Display the DataFrame
+print("\n-----------------------------------------\n")
+print("Random Forest: Feature Importance\n")
+print(feature_importance_df)
+print("\n-----------------------------------------\n")
 
 # -------------------------------------------
 # Plot for Feature Importance Analysis
