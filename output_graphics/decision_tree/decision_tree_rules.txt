@@ -1,22 +1,30 @@
-|--- bmi_category_Overweight <= 0.50
-|   |--- diastolic <= 85.50
-|   |   |--- systolic <= 129.00
-|   |   |   |--- class: 0
-|   |   |--- systolic >  129.00
-|   |   |   |--- class: 0
-|   |--- diastolic >  85.50
-|   |   |--- sleep_duration <= 7.35
-|   |   |   |--- class: 1
-|   |   |--- sleep_duration >  7.35
-|   |   |   |--- class: 2
-|--- bmi_category_Overweight >  0.50
-|   |--- diastolic <= 92.50
-|   |   |--- systolic <= 128.50
-|   |   |   |--- class: 0
-|   |   |--- systolic >  128.50
-|   |   |   |--- class: 1
-|   |--- diastolic >  92.50
-|   |   |--- sleep_duration <= 8.15
-|   |   |   |--- class: 2
-|   |   |--- sleep_duration >  8.15
-|   |   |   |--- class: 2
+
+
+		Decision Tree Rules
+
+		|--- bmi_category_Overweight <= 0.50
+		|   |--- diastolic <= 85.50
+		|   |   |--- systolic <= 129.00
+		|   |   |   |--- class: 0
+		|   |   |--- systolic >  129.00
+		|   |   |   |--- class: 0
+		|   |--- diastolic >  85.50
+		|   |   |--- sleep_duration <= 7.35
+		|   |   |   |--- class: 1
+		|   |   |--- sleep_duration >  7.35
+		|   |   |   |--- class: 2
+		|--- bmi_category_Overweight >  0.50
+		|   |--- diastolic <= 92.50
+		|   |   |--- systolic <= 128.50
+		|   |   |   |--- class: 0
+		|   |   |--- systolic >  128.50
+		|   |   |   |--- class: 1
+		|   |--- diastolic >  92.50
+		|   |   |--- sleep_duration <= 8.15
+		|   |   |   |--- class: 2
+		|   |   |--- sleep_duration >  8.15
+		|   |   |   |--- class: 2
+
+
+
+
