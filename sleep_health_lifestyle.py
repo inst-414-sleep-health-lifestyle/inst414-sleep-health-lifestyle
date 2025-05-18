@@ -59,9 +59,11 @@ df_copy.columns = df_copy.columns.str.strip().str.lower().str.replace(' ', '_')
 df_copy['sleep_disorder'] = df_copy['sleep_disorder'].fillna('None')
 df_copy.loc[df_copy['sleep_disorder'].str.strip() == '', 'sleep_disorder'] = 'None'
 
-# Now check the distribution again to confirm
-print("Target class distribution BEFORE encoding:")
+# Check the distribution again to confirm
+print("\n-----------------------------------------\n")
+print("\nTarget class distribution BEFORE encoding:\n")
 print(df_copy['sleep_disorder'].value_counts())
+print("\n-----------------------------------------\n")
 
 # Step 2: Split blood_pressure into systolic and diastolic
 df_copy[['systolic', 'diastolic']] = df_copy['blood_pressure'].str.split('/', expand=True)
@@ -105,15 +107,12 @@ X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # Step 3. Initialize and train multinomial logistic regression
-log_reg_model = LogisticRegression(
-    multi_class='multinomial', solver='lbfgs', max_iter=500, random_state=42
-)
+log_reg_model = LogisticRegression(solver='lbfgs', max_iter=500, random_state=42)
+
 log_reg_model.fit(X_train_scaled, y_train)
 
 # Step 4. Make predictions
 y_pred_log_reg = log_reg_model.predict(X_test_scaled)
-
-
 
 # -------------------------------------------
 # M-C Logistic Regression: FEATURE ANALYSIS
@@ -196,8 +195,10 @@ for cls in coef_df.index:
 # M-C Logistic Regression: EVALUATTION
 # -------------------------------------------
 
+print("\n-----------------------------------------\n")
 print(f"\nLogistic Regression Accuracy: {accuracy_score(y_test, y_pred_log_reg):.4f}\n")
 print("Logistic Regression Classification Report:\n\n", classification_report(y_test, y_pred_log_reg, target_names=le_classes_ordered))
+print("\n-----------------------------------------\n")
 
 # Generate confusion matrix
 cm = confusion_matrix(y_test, y_pred_log_reg, labels=range(len(le_classes_ordered)))
@@ -237,8 +238,10 @@ print("Number of Misclassifications:", len(misclassified_only))
 misclassified_only.to_csv("logreg_misclassified_sleep_disorder_predictions.csv", index=False)
 print("\nMisclassified (log regress) data saved to 'logreg_misclassified_sleep_disorder_predictions.csv'\n")
 
-#print(misclassified_only)
-misclassified_only
+print("\n-----------------------------------------\n")
+print(misclassified_only)
+#misclassified_only
+print("\n-----------------------------------------\n")
 
 # ===========================================
 # Decision Tree
@@ -422,12 +425,14 @@ plt.show()
 # Decision Tree: EVALUATION
 #-------------------------------------------
 
+print("\n-----------------------------------------\n")
 # Accuracy Score
 accuracy = accuracy_score(y_test, y_pred_dt)
 print(f"\nDecision Tree Accuracy: {accuracy:.4f}\n")
 
 # Classification Report (Precision, Recall, F1-Score)
 print("Decision Tree Classification Report:\n\n", classification_report(y_test, y_pred_dt, target_names=le_classes_ordered))
+print("\n-----------------------------------------\n")
 
 # Confusion Matrix
 cm = confusion_matrix(y_test, y_pred_dt, labels=range(len(le_classes_ordered)))
@@ -470,7 +475,9 @@ misclassified_dt_only.to_csv(filename_dt, index=False)
 print(f"\nMisclassified (Decision Tree) data saved to '{filename_dt}'\n")
 
 # Display the DataFrame
+print("\n-----------------------------------------\n")
 print(misclassified_dt_only)
+print("\n-----------------------------------------\n")
 
 # ===========================================
 # Random Forest
@@ -508,31 +515,38 @@ feature_importance_df = pd.DataFrame({
 # Plot for Feature Importance Analysis
 # -------------------------------------------
 
+# Generate a color list from viridis cmap for the top 20 featurescolors = plt.cm.viridis(np.linspace(0.3, 0.8, 20))
+colors = colors.tolist()  # convert numpy array to list of RGBA tuples
+
 plt.figure(figsize=(12, 8))
 sns.barplot(
-    data=feature_importance_df.head(20),  # Show top 20 for readability
+    data=feature_importance_df.head(20),
     x='Importance',
     y='Feature',
-    palette='viridis'
+    palette=colors,
+    legend=False  # suppress legend if you want (optional)
 )
-
 plt.title('Top 20 Most Important Features (Random Forest)', fontsize=16)
 plt.xlabel('Importance')
 plt.ylabel('Feature')
 plt.tight_layout()
 plt.savefig("random_forest_feature_importance.png", dpi=300, bbox_inches='tight')
-print("Random forest feature importance graph saved as: 'random_forest_feature_importance.png'")
+print("\nRandom forest feature importance graph saved as: 'random_forest_feature_importance.png'\n")
 plt.show()
+
 
 # -------------------------------------------
 # Random Forest: EVALUATION
 #-------------------------------------------
+
+print("\n-----------------------------------------\n")
 # Accuracy Score
 accuracy = accuracy_score(y_test, y_pred_rf)
 print(f"\nRandom Forest Accuracy: {accuracy:.4f}\n")
 
 # Classification Report (Precision, Recall, F1-Score)
 print("Random Forest Classification Report:\n\n", classification_report(y_test, y_pred_rf, target_names=le_classes_ordered))
+print("\n-----------------------------------------\n")
 
 # Confusion Matrix
 cm = confusion_matrix(y_test, y_pred_rf, labels=range(len(le_classes_ordered)))
@@ -574,7 +588,9 @@ misclassified_rf_only.to_csv(filename_dt, index=False)
 print(f"\nMisclassified (Random Forest) data saved to '{filename_dt}'\n")
 
 # Display the DataFrame
+print("\n-----------------------------------------\n")
 print(misclassified_rf_only)
+print("\n-----------------------------------------\n")
 
 # ===========================================
 # EVALUATION
@@ -630,7 +646,6 @@ print("\n-----------------------------------------\n")
 # ----------------------------------------------------------
 # BAR PLOTS: COMPARISON OF METRICS
 # ----------------------------------------------------------
-
 # --------- Bar Plot: Models on x-axis ----------
 plasma = ['#0d0887', '#7201a8', '#bd3786', '#ed7953']
 
@@ -639,16 +654,22 @@ ax1 = metrics_df[['Accuracy', 'Precision', 'Recall', 'F1 Score']].plot(
     figsize=(10, 6),
     color=plasma
 )
-plt.title('Comparison of Evaluation Metrics by Model', fontsize=14)
+plt.title('Comparison of Evaluation Metrics by Model', fontsize=14, fontweight='bold')
 plt.ylabel('Score')
 plt.xlabel('Model')
-plt.ylim(0.7, 0.82)
+plt.ylim(0.80, 1.0)  # Start y-axis at 0.80
 plt.xticks(rotation=0)
 plt.legend(title='Metric')
 plt.tight_layout()
+
+# Add values on top of bars rounded to 2 decimals
+for container in ax1.containers:
+    ax1.bar_label(container, fmt='%.2f', fontweight='bold')
+
 plt.savefig("metric_by_model_comparison.png", dpi=300, bbox_inches='tight')
-print("Comparison of evaluation metrics saved as: 'metric_by_model_comparison.png'")
+print("\nComparison of evaluation metrics saved as: 'metric_by_model_comparison.png'\n")
 plt.show()
+
 
 # --------- Bar Plot: Metrics on x-axis ----------
 viridis = ['#35b779', '#3e4989', '#440154']
@@ -658,13 +679,19 @@ ax2 = metrics_df.T.plot(
     figsize=(10, 6),
     color=viridis
 )
-plt.title('Comparison of Models by Evaluation Metric', fontsize=14)
+plt.title('Comparison of Models by Evaluation Metric', fontsize=14, fontweight='bold')
 plt.ylabel('Score')
 plt.xlabel('Metric')
-plt.ylim(0.7, 0.82)
+plt.ylim(0.80, 1.0)  # Start y-axis at 0.80
 plt.xticks(rotation=0)
 plt.legend(title='Model')
 plt.tight_layout()
+
+# Add values on top of bars rounded to 2 decimals
+for container in ax2.containers:
+    ax2.bar_label(container, fmt='%.2f', fontweight='bold')
+
 plt.savefig("model_by_metric_comparison.png", dpi=300, bbox_inches='tight')
-print("Comparison of models saved as: 'model_by_metric_comparison.png'")
+print("\nComparison of models saved as: 'model_by_metric_comparison.png'\n")
 plt.show()
+
