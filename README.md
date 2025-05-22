@@ -4,16 +4,19 @@
 *University of Maryland, 2025*
 
 ## Description
-TBD
+This project explores how sleep patterns, health indicators, and lifestyle behaviors contribute to overall well-being by predicting categorical health outcomes using machine learning. We employ three supervised learning models—Logistic Regression, Decision Tree, and Random Forest—to classify outcomes based on input features related to sleep, physical activity, and demographic variables.
+
+The goal is to identify which features are most predictive of health status and assess model performance across multiple evaluation metrics.
 
 ## Methodology
 The analysis uses supervised learning, employing three classification models: Logistic Regression, Decision Trees, and Random Forest. 
 
 The methodology includes:
 * **Data Preprocessing**: Handling missing values, encoding categorical variables, and scaling numerical features.
-* **Model Training**: The models are trained on the dataset, which is split into training and test sets.
+* **Model Training**: Train Logistic Regression, Decision Tree, and Random Forest models. Use an 80/20 train-test split to evaluate generalizability
 * **Model Evaluation**: The models are evaluated using performance metrics like accuracy, precision, recall, and F1-score. A confusion matrix is also used to assess model performance.
-* **Feature Importance**: The models rank features based on their contribution to the survival prediction.
+* **Feature Importance**: Analyze top predictors based on feature importance scores from tree-based models
+
 
 ## Required Dependencies
 To run the project, the following Python libraries are required:
@@ -22,7 +25,6 @@ To run the project, the following Python libraries are required:
 * `scikit-learn`
 * `matplotlib`
 * `seaborn`
-TBD
 
 ## Output
 The script generates:
@@ -31,7 +33,9 @@ The script generates:
 * **Model Performance Metrics**: Including accuracy, precision, recall, and F1-score for each model.
 
 ## Limitations
-TBD
+* The models are based on a specific dataset and may not generalize to other populations or health domains
+* Correlation does not imply causation; predictive power does not confirm clinical significance
+* Imbalanced classes or noisy labels may impact performance metrics
 
 ## Future Improvements
-TBD
+* Hyperparameter tuning and cross-validation to optimize model performance.
